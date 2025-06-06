@@ -55,9 +55,11 @@ func setupPostgresConnection() (*sql.DB, error) {
 	return sql.Open("postgres", postgresUri)
 }
 
+// Initialises the Gin router, I just figured this would be good outside of main.
 func setupGinRouter(state *AppState) (*gin.Engine, error) {
 	r := gin.Default()
 
+	// TODO: This secret should be actually random, in correct format.
 	store, err := postgres.NewStore(state.db, []byte("secret"))
 	if err != nil {
 		return nil, err
@@ -95,6 +97,13 @@ func addRoutes(r *gin.Engine) {
 	})
 
 	r.GET("/", func(c *gin.Context) {
+		session := sessions.Default(c)
+		id := session.Get("id")
+
+		if id == nil {
+			session.Set("id", "1234")
+		}
+
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"title": "Temporary Email Service",
 		})
