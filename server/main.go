@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -14,6 +15,9 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/nullndvoid/tempmailgen/server/db"
+
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -58,6 +62,22 @@ func setupPostgresConnection() (*sql.DB, error) {
 // Initialises the Gin router, I just figured this would be good outside of main.
 func setupGinRouter(state *AppState) (*gin.Engine, error) {
 	r := gin.Default()
+
+	ctx := context.Background()
+
+	conn, err := pgx.Connect(ctx, postgresUri)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close(ctx)
+
+	queries := db.New(conn)
+
+	queries.CreateMailbox(ctx, db.CreateMailboxParams{
+		Email:    "john@nullndvoid.xyz",
+		DomainID: 1,
+		Password: "TODO some hash blah foo",
+	})
 
 	// TODO: This secret should be actually random, in correct format.
 	store, err := postgres.NewStore(state.db, []byte("secret"))
