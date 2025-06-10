@@ -8,6 +8,22 @@ const CONFIG = {
 class TempMailApp {
   constructor() {
     console.info("App loaded!");
+    this.bindEvents();
+  }
+
+  bindEvents() {
+    const btn = document.querySelector("#new-mailbox-submit");
+    if (btn) {
+      btn.addEventListener("click", (e) => {
+        // Don't submit the form immediately.
+        e.preventDefault();
+        this.getNewMailbox();
+      });
+    }
+  }
+
+  getNewMailbox() {
+    console.info("Getting new mailbox!");
   }
 }
 
